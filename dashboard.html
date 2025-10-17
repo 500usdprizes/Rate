@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Dashboard Control</title>
+  <style>
+    body {
+      background: #0f0f0f;
+      color: #e8dcb8;
+      font-family: "Manrope", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .card {
+      background: #1a1a1a;
+      padding: 25px 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.05);
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 6px 0;
+      border: none;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    input { background: #111; color: #f0e8d0; }
+    button { background: #c2a669; color: #000; font-weight: 600; cursor: pointer; transition: 0.3s; }
+    button:hover { background: #e3c98a; }
+    .status { margin-top: 10px; font-size: 0.9rem; opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🔧 Loader Control</h2>
+    <input id="repo" placeholder="username/repo-name">
+    <input id="token" placeholder="GitHub Token">
+    <input id="redirect" placeholder="Redirect URL (https://...)">
+    <button onclick="updateConfig('on')">Turn ON</button>
+    <button onclick="updateConfig('off')">Turn OFF</button>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <script>
+  async function updateConfig(state) {
+    const repo = document.getElementById("repo").value.trim();
+    const token = document.getElementById("token").value.trim();
+    const url = document.getElementById("redirect").value.trim();
+    const statusMsg = document.getElementById("statusMsg");
+    if (!repo || !token) return alert("Missing info!");
+
+    const api = `https://api.github.com/repos/${repo}/contents/config.json`;
+    const res = await fetch(api, { headers: { Authorization: `token ${token}` }});
+    const data = await res.json();
+
+    const newCfg = { status: state, redirect_url: url || "https://example.com" };
+    const encoded = btoa(JSON.stringify(newCfg, null, 2));
+
+    const update = await fetch(api, {
+      method: "PUT",
+      headers: {
+        Authorization: `token ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: `Switch to ${state.toUpperCase()}`,
+        content: encoded,
+        sha: data.sha
+      })
+    });
+
+    if (update.ok) {
+      statusMsg.textContent = `✅ Switched to ${state.toUpperCase()}`;
+    } else {
+      statusMsg.textContent = `❌ Failed to update`;
+    }
+  }
+  </script>
+</body>
+</html>
