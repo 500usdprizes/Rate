@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Loading...</title>
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/189/189792.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     body {
       background: #111;
-      color: #e8dcb8;
+      color: #f0e9d8;
       margin: 0;
       height: 100vh;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Manrope', sans-serif;
+      font-family: 'Poppins', sans-serif;
       transition: background 0.8s, color 0.8s;
     }
 
@@ -30,7 +30,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 28px;
+      gap: 30px;
       animation: fadeIn 1.2s ease-in-out;
     }
 
@@ -39,22 +39,27 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Circular loader (your design) */
     .loader {
-      width: 72px;
+      width: 70px;
       aspect-ratio: 1;
       border-radius: 50%;
       border: 8px solid;
       border-color: #e3c98a #0000;
       animation: spin 1s infinite linear;
-      filter: drop-shadow(0 0 12px #cbb67a);
+      filter: drop-shadow(0 0 10px #bfae8a);
     }
-    @keyframes spin { to { transform: rotate(0.5turn); } }
+
+    @keyframes spin {
+      to { transform: rotate(0.5turn); }
+    }
 
     .loading-percentage {
       font-size: 1.8rem;
       font-weight: 600;
       color: #e3c98a;
       text-shadow: 0 0 8px #8d7958a0;
+      transition: opacity 0.3s;
     }
 
     .loading-message {
@@ -62,76 +67,70 @@
       color: #bfae8a;
       text-align: center;
       letter-spacing: 0.3px;
-    }
-
-    .link-icon {
-      width: 28px;
-      height: 28px;
-      fill: #e3c98a;
-      animation: pulse 1.6s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.2); }
+      transition: opacity 0.3s;
     }
 
     @media (max-width: 500px) {
-      .center-container { gap: 22px; }
+      .center-container { gap: 24px; }
       .loader { width: 55px; border-width: 6px; }
       .loading-percentage { font-size: 1.4rem; }
-      .loading-message { font-size: 0.95rem; }
+      .loading-message { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
   <div class="center-container" id="loaderScreen">
     <div class="loader"></div>
-    <svg class="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M10.59 13.41a1 1 0 0 1 0-1.41l3-3a1 1 0 1 1 1.41 1.41L12.41 12l2.59 2.59a1 1 0 0 1-1.41 1.41l-3-3z"/>
-    </svg>
     <div class="loading-percentage" id="percent">0%</div>
-    <div class="loading-message" id="message">Connecting...</div>
+    <div class="loading-message" id="message">Checking...</div>
   </div>
 
   <script>
-    const percentElem = document.getElementById('percent');
-    const msgElem = document.getElementById('message');
-    const loaderScreen = document.getElementById('loaderScreen');
-    const messages = ["Checking server...", "Verifying session...", "Almost ready..."];
-    let percent = 0, msgIdx = 0;
+  // ===== SETTINGS =====
+  const isReady = false; // Change to true to enable redirect
+  const redirectURL = "https://your-link.com"; // Destination URL
+  // ====================
 
-    // Load config.json
-    fetch("config.json?_=" + Date.now())
-      .then(res => res.json())
-      .then(cfg => startLoader(cfg))
-      .catch(() => msgElem.textContent = "Unable to connect.");
+  const percentElem = document.getElementById('percent');
+  const msgElem = document.getElementById('message');
+  const loaderScreen = document.getElementById('loaderScreen');
+  const messages = [
+    "Please wait...",
+    "Coming soon...",
+    "Service will be available shortly."
+  ];
 
-    function startLoader(cfg) {
-      const interval = setInterval(() => {
-        if (percent < 100) {
-          percent += Math.floor(Math.random() * 4) + 1;
-          if (percent > 100) percent = 100;
-          percentElem.textContent = percent + "%";
-        } else {
-          clearInterval(interval);
-          if (cfg.status === "on") {
-            loaderScreen.classList.add("fade-out");
-            setTimeout(() => { window.location.href = cfg.redirect_url; }, 900);
-          } else {
-            msgElem.textContent = "Service temporarily offline.";
-          }
-        }
-      }, 70);
+  let percent = 0, msgIdx = 0;
 
-      setInterval(() => {
-        msgIdx = (msgIdx + 1) % messages.length;
-        msgElem.style.opacity = 0;
-        setTimeout(() => {
-          msgElem.textContent = messages[msgIdx];
-          msgElem.style.opacity = 1;
-        }, 800);
-      }, 4000);
+  // Loading percentage counter
+  const interval = setInterval(() => {
+    if (percent < 100) {
+      percent += Math.floor(Math.random() * 4) + 1;
+      if (percent > 100) percent = 100;
+      percentElem.textContent = percent + "%";
+    } else {
+      clearInterval(interval);
+      if (isReady) {
+        loaderScreen.classList.add("fade-out");
+        setTimeout(() => { window.location.href = redirectURL; }, 900);
+      }
     }
-  </script>
+  }, 70);
+
+  // Smooth message rotation (slower + smoother)
+  function rotateMessage() {
+    msgIdx = (msgIdx + 1) % messages.length;
+    msgElem.style.transition = "opacity 1s ease";
+    msgElem.style.opacity = 0;
+
+    setTimeout(() => {
+      msgElem.textContent = messages[msgIdx];
+      msgElem.style.opacity = 1;
+    }, 1000);
+  }
+
+  // Change every 5 seconds for smoother experience
+  setInterval(rotateMessage, 4000);
+</script>
 </body>
 </html>
