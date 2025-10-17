@@ -3,127 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>under developing...</title>
+  <title>Loading...</title>
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/189/189792.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
-      background: #181818;
-      color: #e9e6e1;
+      background: #111;
+      color: #e8dcb8;
       margin: 0;
       height: 100vh;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 1s;
-      font-family: 'Segoe UI', 'Arial', sans-serif;
-      animation: fadeIn 1s;
+      font-family: 'Manrope', sans-serif;
+      transition: background 0.8s, color 0.8s;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0;}
-      to { opacity: 1;}
+    .fade-out {
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.8s ease-in-out;
     }
 
     .center-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 32px;
+      gap: 28px;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .loader {
-      width: 80px;
+      width: 72px;
       aspect-ratio: 1;
-      --c:#8d7958 98%,#0000;
-      background:
-        radial-gradient(50% 70% at 50% 120%, var(--c)) top,
-        radial-gradient(70% 50% at -20% 50%, var(--c)) right,
-        radial-gradient(50% 70% at 50% -20%, var(--c)) bottom,
-        radial-gradient(70% 50% at 120% 50%, var(--c)) left;
-      background-size: 100% 50.1%,50.1% 100%;
-      background-repeat: no-repeat;
-      -webkit-mask: radial-gradient(circle 5px,#0000 90%,#000);
-      animation: l9 1.5s infinite linear;
-      box-shadow: 0 0 40px 10px #8d7958cc, 0 0 0 4px #2e2410 inset;
-      filter: drop-shadow(0 0 12px #8d7958a0);
+      border-radius: 50%;
+      border: 8px solid;
+      border-color: #e3c98a #0000;
+      animation: spin 1s infinite linear;
+      filter: drop-shadow(0 0 12px #cbb67a);
     }
-    @keyframes l9 { 
-      100%{transform: rotate(1turn)}
-    }
+    @keyframes spin { to { transform: rotate(0.5turn); } }
 
     .loading-percentage {
-      font-size: 2rem;
-      font-weight: bold;
+      font-size: 1.8rem;
+      font-weight: 600;
       color: #e3c98a;
-      letter-spacing: 0.05em;
-      text-shadow: 0 2px 10px #8d7958a0;
-      margin-top: -16px;
-      font-family: 'Consolas', 'Menlo', monospace;
+      text-shadow: 0 0 8px #8d7958a0;
     }
 
     .loading-message {
       font-size: 1.1rem;
       color: #bfae8a;
-      min-height: 1.2em;
       text-align: center;
-      animation: msgFade 1s;
+      letter-spacing: 0.3px;
     }
-    @keyframes msgFade {
-      from { opacity: 0;}
-      to { opacity: 1;}
+
+    .link-icon {
+      width: 28px;
+      height: 28px;
+      fill: #e3c98a;
+      animation: pulse 1.6s infinite;
     }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
     @media (max-width: 500px) {
-      .center-container { gap: 20px; }
-      .loader { width: 50px; }
-      .loading-percentage { font-size: 1.2rem; }
+      .center-container { gap: 22px; }
+      .loader { width: 55px; border-width: 6px; }
+      .loading-percentage { font-size: 1.4rem; }
+      .loading-message { font-size: 0.95rem; }
     }
   </style>
 </head>
 <body>
-  <div class="center-container">
+  <div class="center-container" id="loaderScreen">
     <div class="loader"></div>
+    <svg class="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M10.59 13.41a1 1 0 0 1 0-1.41l3-3a1 1 0 1 1 1.41 1.41L12.41 12l2.59 2.59a1 1 0 0 1-1.41 1.41l-3-3z"/>
+    </svg>
     <div class="loading-percentage" id="percent">0%</div>
-    <div class="loading-message" id="message">Initializing...</div>
+    <div class="loading-message" id="message">Connecting...</div>
   </div>
+
   <script>
-    // Dynamic percentage
-    let percent = 0;
     const percentElem = document.getElementById('percent');
-    const interval = setInterval(() => {
-      if (percent < 100) {
-        percent += Math.floor(Math.random() * 3) + 1;
-        if (percent > 100) percent = 100;
-        percentElem.textContent = percent + '%';
-      } else {
-        clearInterval(interval);
-      }
-    }, 60);
+    const msgElem = document.getElementById('message');
+    const loaderScreen = document.getElementById('loaderScreen');
+    const messages = ["Checking server...", "Verifying session...", "Almost ready..."];
+    let percent = 0, msgIdx = 0;
 
-    // Fun loading messages
-    const messages = [
-      "Loading awesomeness...",
-      "Brewing the best experience ☕",
-      "Reticulating splines...",
-      "Summoning pixels...",
-      "Polishing code...",
-      "Compiling magic...",
-      "Almost there...",
-      "Fetching data from the cloud 🌥️",
-      "Preparing your dashboard...",
-      "Just a moment more...",
-      "Optimizing for speed 🚀",
-      "Making things amazing..."
-    ];
-    let msgIdx = 0;
-    function rotateMessage() {
-      msgIdx = (msgIdx + 1) % messages.length;
-      document.getElementById('message').textContent = messages[msgIdx];
+    // Load config.json
+    fetch("config.json?_=" + Date.now())
+      .then(res => res.json())
+      .then(cfg => startLoader(cfg))
+      .catch(() => msgElem.textContent = "Unable to connect.");
+
+    function startLoader(cfg) {
+      const interval = setInterval(() => {
+        if (percent < 100) {
+          percent += Math.floor(Math.random() * 4) + 1;
+          if (percent > 100) percent = 100;
+          percentElem.textContent = percent + "%";
+        } else {
+          clearInterval(interval);
+          if (cfg.status === "on") {
+            loaderScreen.classList.add("fade-out");
+            setTimeout(() => { window.location.href = cfg.redirect_url; }, 900);
+          } else {
+            msgElem.textContent = "Service temporarily offline.";
+          }
+        }
+      }, 70);
+
+      setInterval(() => {
+        msgIdx = (msgIdx + 1) % messages.length;
+        msgElem.style.opacity = 0;
+        setTimeout(() => {
+          msgElem.textContent = messages[msgIdx];
+          msgElem.style.opacity = 1;
+        }, 800);
+      }, 4000);
     }
-    setInterval(rotateMessage, 2300);
-
-    // Optional: Simulate a redirect after loading is done (uncomment to use)
-    // setTimeout(() => { window.location.href = "https://your-site.com/main"; }, 6000);
   </script>
 </body>
 </html>
